@@ -65,7 +65,7 @@ const uint8_t PROGMEM
 // LOOP FUNCTION - runs over and over - does animation ---------------------
 
 void loop() {
-  uint8_t  i, r, g, b;
+  uint8_t  i, j, r, g, b;
   uint16_t minLvl, maxLvl, a, scaled;
 
   a           = CircuitPlayground.mic.peak(10); // 10 ms of audio
@@ -107,11 +107,17 @@ void loop() {
   uint16_t a1, a2;                   // Scaling factors for color blending
 
   for(i=0; i<10; i++) {              // For each NeoPixel...
-    if(i <= whole) {                 // In currently-lit area?
-      r = pgm_read_byte(&reds[i]),   // Look up pixel color
-      g = pgm_read_byte(&greens[i]),
-      b = pgm_read_byte(&blues[i]);
-      if(i == whole) {               // Fraction pixel at top of range?
+    if(i<5) {
+      j = i * 2;
+    } else {
+      j = (10 - i) * 2;
+    }
+
+    if(j <= whole) {                 // In currently-lit area?
+      r = pgm_read_byte(&reds[j]),   // Look up pixel color
+      g = pgm_read_byte(&greens[j]),
+      b = pgm_read_byte(&blues[j]);
+      if(j == whole) {               // Fraction pixel at top of range?
         a1 = (uint16_t)frac + 1;     // Fade toward black
         r  = (r * a1) >> 8;
         g  = (g * a1) >> 8;
@@ -121,13 +127,13 @@ void loop() {
       r = g = b = 0;                 // In unlit area
     }
     // Composite the peak pixel atop whatever else is happening...
-    if(i == whole2) {                // Peak pixel?
+    if(j == whole2) {                // Peak pixel?
       a1 = 256 - frac2;              // Existing pixel blend factor 1-256
       a2 = frac2 + 1;                // Peak pixel blend factor 1-256
       r  = ((r * a1) + (0x84 * a2)) >> 8; // Will
       g  = ((g * a1) + (0x87 * a2)) >> 8; // it
       b  = ((b * a1) + (0xC3 * a2)) >> 8; // blend?
-    } else if(i == (whole2-1)) {     // Just below peak pixel
+    } else if(j == (whole2-1)) {     // Just below peak pixel
       a1 = frac2 + 1;                // Opposite blend ratios to above,
       a2 = 256 - frac2;              // but same idea
       r  = ((r * a1) + (0x84 * a2)) >> 8;
